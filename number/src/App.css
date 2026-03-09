@@ -1,0 +1,151 @@
+:root {
+  --b: #000;
+  --w: #fff;
+  --g: #f0f0f0;
+  --dg: #888;
+}
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: var(--w);
+  color: var(--b);
+  /* 화면 정중앙 배치를 위한 설정 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.app {
+  width: 100%;
+  max-width: 450px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+header h1 {
+  font-size: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* 입력창과 버튼을 나란히 배치 */
+.input-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.input-group input {
+  flex: 1;
+  padding: 15px;
+  border: 1px solid var(--g);
+  border-radius: 8px;
+  font-size: 16px;
+  margin-bottom: 0; /* 기존 마진 제거 */
+}
+
+.reset-btn {
+  padding: 0 15px;
+  background: var(--b);
+  color: var(--w);
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab-menu {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+
+.tab-menu button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: var(--g);
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.tab-menu button.active {
+  background: var(--b);
+  color: var(--w);
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.timetable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.timetable th,
+.timetable td {
+  border: 1px solid var(--g);
+  padding: 8px;
+  text-align: center;
+}
+
+.period {
+  background: var(--g);
+  font-weight: bold;
+}
+
+/* 기존 스타일 유지하면서 아래 부분만 확인 또는 수정 */
+
+.meal-header .date {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--b); /* 날짜와 조/중/석식 글자색 */
+}
+
+.meal-item {
+  background: var(--g);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px; /* 항목 간 간격 확보 */
+  border-left: 4px solid var(--b); /* 식단 카드 왼쪽에 강조선 추가 */
+}
+
+.meal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--dg);
+  padding-bottom: 5px;
+}
+
+.meal-item {
+  background: var(--g);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.meal-item .date {
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.meal-item .menu {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.status-msg {
+  text-align: center;
+  color: var(--dg);
+}
