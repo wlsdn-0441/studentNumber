@@ -13,7 +13,6 @@ export const generateClassPDF = async (classNum, studentData) => {
   const doc = new jsPDF('p', 'mm', 'a4');
   const container = document.createElement('div');
   
-  // [수정] 높이를 120mm로 고정하여 PDF 삽입 크기(90x120)와 비율을 1:1로 맞춤 (글자 왜곡 방지)
   container.style.width = '90mm';
   container.style.height = '120mm'; 
   container.style.backgroundColor = 'white';
@@ -28,7 +27,6 @@ export const generateClassPDF = async (classNum, studentData) => {
   const dayLabels = ["월", "화", "수", "목", "금"];
   const classCommon = COMMON_SCHEDULES[classNum] || {}; 
 
-  // [추가] 연한 테두리 색상 정의
   const lightBorder = '1px solid #e0e0e0';
 
   for (let i = 0; i < studentNums.length; i++) {
@@ -46,7 +44,6 @@ export const generateClassPDF = async (classNum, studentData) => {
     const posX = 10 + (col * 100); 
     const posY = 15 + (row * 135);
 
-    // [수정] border 설정을 연하게 변경하고 height: 100% 부여
     let tableHtml = `
       <div style="font-family: sans-serif; padding: 5px; border: ${lightBorder}; box-sizing: border-box; height: 100%; display: flex; flex-direction: column;">
         <h3 style="text-align: center; margin: 0 0 5px 0; font-size: 12px; height: 15px;">부경고 (${classNum}반 ${sNum}번)</h3>
@@ -62,7 +59,7 @@ export const generateClassPDF = async (classNum, studentData) => {
 
     for (let pIdx = 0; pIdx < 7; pIdx++) {
       const period = pIdx + 1;
-      // [수정] 행 높이를 균등하게 배분
+      // 줄바꿈 대비 행 높이 유지
       tableHtml += `<tr style="height: 38px;"><td style="border: ${lightBorder}; background: #fcfcfc; font-weight: bold;">${period}</td>`;
       
       dayKeys.forEach((day) => {
@@ -85,7 +82,18 @@ export const generateClassPDF = async (classNum, studentData) => {
                     : "-";
         }
         
-        tableHtml += `<td style="border: ${lightBorder}; background-color: ${cellColor}; padding: 2px; word-break: break-all; overflow: hidden;">${content}</td>`;
+        // [수정된 핵심 로직] 괄호 분리 및 줄바꿈 처리
+        let displayContent = "";
+        if (content.includes("(") && content.includes(")")) {
+          const parts = content.split("(");
+          const subject = parts[0];
+          const teacher = parts[1].replace(")", "");
+          displayContent = `<div style="font-weight: bold;">${subject}</div><div style="font-size: 7.5px; color: #666;">${teacher}</div>`;
+        } else {
+          displayContent = `<div>${content}</div>`;
+        }
+        
+        tableHtml += `<td style="border: ${lightBorder}; background-color: ${cellColor}; padding: 2px; word-break: break-all; overflow: hidden; vertical-align: middle;">${displayContent}</td>`;
       });
       tableHtml += `</tr>`;
     }
@@ -93,7 +101,6 @@ export const generateClassPDF = async (classNum, studentData) => {
     tableHtml += `</tbody></table></div>`;
     container.innerHTML = tableHtml;
 
-    // [수정] 고정된 컨테이너 크기만큼 정확하게 캡처하도록 width, height 지정
     const canvas = await html2canvas(container, { 
       scale: 3,
       width: container.offsetWidth,
