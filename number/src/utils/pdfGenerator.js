@@ -5,15 +5,12 @@ import { COMMON_SCHEDULES } from '../constants/commonSchedules';
 
 export const generateClassPDF = async (classNum, studentData) => {
   const students = studentData[classNum];
-  if (!students) {
-    alert(`${classNum}반 학생 데이터가 없습니다.`);
-    return;
-  }
+  if (!students) return alert(`${classNum}반 데이터가 없습니다.`);
 
   const doc = new jsPDF('p', 'mm', 'a4');
   const container = document.createElement('div');
   
-  // 캡처용 임시 컨테이너 설정
+  // 캡처용 스타일 설정
   container.style.width = '190mm';
   container.style.padding = '10mm';
   container.style.backgroundColor = 'white';
@@ -23,8 +20,7 @@ export const generateClassPDF = async (classNum, studentData) => {
 
   const studentNums = Object.keys(students).sort();
   const dayKeys = ["mon", "tue", "wed", "thu", "fri"];
-  const dayLabels = ["월", "화", "수", "목", "금"];
-  const classCommon = COMMON_SCHEDULES[classNum] || {}; 
+  const classCommon = COMMON_SCHEDULES[String(classNum)] || {};
 
   for (let i = 0; i < studentNums.length; i++) {
     const sNum = studentNums[i];
@@ -34,12 +30,16 @@ export const generateClassPDF = async (classNum, studentData) => {
 
     let tableHtml = `
       <div style="font-family: sans-serif; padding: 10px;">
-        <h2 style="text-align: center; margin-bottom: 20px;">부경고등학교 시간표 (${classNum}반 ${sNum}번)</h2>
+        <h2 style="text-align: center; margin-bottom: 20px;">시간표 (${classNum}반 ${sNum}번)</h2>
         <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; table-layout: fixed;">
           <thead>
             <tr style="background: #f8f9fa;">
               <th style="border: 1px solid #dee2e6; padding: 12px; width: 50px;">교시</th>
-              ${dayLabels.map(d => `<th style="border: 1px solid #dee2e6; padding: 12px;">${d}</th>`).join('')}
+              <th style="border: 1px solid #dee2e6;">월</th>
+              <th style="border: 1px solid #dee2e6;">화</th>
+              <th style="border: 1px solid #dee2e6;">수</th>
+              <th style="border: 1px solid #dee2e6;">목</th>
+              <th style="border: 1px solid #dee2e6;">금</th>
             </tr>
           </thead>
           <tbody>
@@ -52,30 +52,17 @@ export const generateClassPDF = async (classNum, studentData) => {
       dayKeys.forEach((day) => {
         const type = TIMETABLE_MAP[day][pIdx];
         let content = "";
-        let cellColor = "#ffffff";
 
-        if (type === "BLANK") {
-          content = "";
-        } else if (type === "FREE") {
-          content = "공강";
-          cellColor = "#fff5f5";
-        } else if (type ==="C1" || type === "C2" || type === "C3" || type === "C4" || type === "C5") {
-          // [합치기] 학생 선택 과목 데이터 적용
+        if (type === "BLANK") content = "";
+        else if (type === "FREE") content = "공강";
+        else if (type.startsWith("C")) {
           const cIdx = type.replace("C", "");
           content = (choices && choices[cIdx]) ? choices[cIdx] : "-";
-          cellColor = "#f1f7ff";
-        console.log(`선택 과목 적용`);
-      
-    
-    } else  {
-          // [합치기] 반별 공통 시간표 데이터 적용
-          content = (classCommon[day] && classCommon[day][period]) 
-                    ? classCommon[day][period] 
-                    : "-";
-        console.log(`공통 과목 적용`);    
+        } else {
+          const dayData = classCommon[day] || {};
+          content = dayData[period] || dayData[String(period)] || "-";
         }
-        
-        tableHtml += `<td style="border: 1px solid #dee2e6; padding: 12px; background-color: ${cellColor};">${content}</td>`;
+        tableHtml += `<td style="border: 1px solid #dee2e6; padding: 12px;">${content}</td>`;
       });
       tableHtml += `</tr>`;
     }
@@ -83,11 +70,36 @@ export const generateClassPDF = async (classNum, studentData) => {
     tableHtml += `</tbody></table></div>`;
     container.innerHTML = tableHtml;
 
-    const canvas = await html2canvas(container, { scale: 2 });
+    const canvas = await html2canvas(container, { scale: 2, useCORS: true });
     const imgData = canvas.toDataURL('image/png');
     doc.addImage(imgData, 'PNG', 10, 20, 190, (canvas.height * 190) / canvas.width);
   }
 
-  doc.save(`${classNum}반_전체시간표.pdf`);
+  // --- [핵심: 링크 강제 생성 및 다운로드 로직] ---
+  try {
+    const pdfBlob = doc.output('blob');
+    const url = URL.createObjectURL(pdfBlob);
+    const fileName = `${classNum}_class_timetable.pdf`; // 모바일 안전을 위해 영어 권장
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    
+    // 안드로이드 크롬 호환성을 위해 body에 잠시 추가
+    document.body.appendChild(link);
+    link.click();
+    
+    // 클릭 후 정리
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, 200);
+
+  } catch (error) {
+    console.error("Download failed:", error);
+    // 예외 상황 발생 시 기존 save 방식 시도
+    doc.save(`${classNum}ban_timetable.pdf`);
+  }
+
   document.body.removeChild(container);
 };
