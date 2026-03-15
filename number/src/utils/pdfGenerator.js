@@ -109,7 +109,7 @@ export const generateClassPDF = async (classNum, studentData) => {
   const link = document.createElement('a');
   
   link.href = url;
-  link.download = `${classNum}_class_timetable.pdf`;
+  link.download = `${classNum}반 시간표.pdf`;
   document.body.appendChild(link);
   link.click();
   
