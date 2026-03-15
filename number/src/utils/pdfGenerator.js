@@ -59,16 +59,20 @@ export const generateClassPDF = async (classNum, studentData) => {
         } else if (type === "FREE") {
           content = "공강";
           cellColor = "#fff5f5";
-        } else if (type.startsWith("C")) {
+        } else if (type ==="C1" || type === "C2" || type === "C3" || type === "C4" || type === "C5") {
           // [합치기] 학생 선택 과목 데이터 적용
           const cIdx = type.replace("C", "");
           content = (choices && choices[cIdx]) ? choices[cIdx] : "-";
           cellColor = "#f1f7ff";
-        } else {
+        console.log(`선택 과목 적용`);
+      
+    
+    } else  {
           // [합치기] 반별 공통 시간표 데이터 적용
           content = (classCommon[day] && classCommon[day][period]) 
                     ? classCommon[day][period] 
                     : "-";
+        console.log(`공통 과목 적용`);    
         }
         
         tableHtml += `<td style="border: 1px solid #dee2e6; padding: 12px; background-color: ${cellColor};">${content}</td>`;
